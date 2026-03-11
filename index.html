@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Admin - Sentiment Analysis</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .login-container h2 {
+        margin-bottom: 25px;
+        color: #1a2a6c;
+        font-weight: 600;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e8ee;
+        border-radius: 8px;
+        outline: none;
+        transition: 0.3s;
+      }
+
+      .input-group input:focus {
+        border-color: #1a2a6c;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+
+        background: #1a2a6c;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #0d1a44;
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Login Admin</h2>
+      <form id="loginForm">
+        <div class="input-group">
+          <input type="text" id="username" placeholder="Username" required />
+        </div>
+        <div class="input-group">
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <button type="submit">Masuk Ke Dashboard</button>
+      </form>
+    </div>
+
+    <script>
+      document.getElementById("loginForm").onsubmit = function (e) {
+        e.preventDefault();
+        const user = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+
+        if (user === "alya" && pass === "angga") {
+          localStorage.setItem("login", "true");
+          window.location.href = "dashboard.html";
+        } else {
+          alert("Username atau Password Salah!");
+        }
+      };
+    </script>
+  </body>
+</html>
