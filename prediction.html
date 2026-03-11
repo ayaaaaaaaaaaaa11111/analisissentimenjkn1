@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prediction Sentimen | BPJS Kesehatan</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        display: flex;
+        background: #f4f7f6;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 250px;
+        background: #1b263b;
+        color: white;
+        padding: 20px;
+        height: 100vh;
+        position: fixed;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .logo img {
+        width: 60px;
+        background: white;
+        border-radius: 50%;
+        padding: 5px;
+        margin-bottom: 10px;
+      }
+
+      .menu a {
+        display: block;
+        color: #bdc3c7;
+        padding: 12px;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: 0.3s;
+      }
+      .menu a.active,
+      .menu a:hover {
+        background: #415a77;
+        color: white;
+      }
+
+      .content {
+        margin-left: 250px;
+        padding: 40px;
+        width: calc(100% - 250px);
+      }
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        color: #1b263b;
+      }
+      textarea {
+        width: 100%;
+        height: 120px;
+        padding: 15px;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-top: 10px;
+        margin-bottom: 15px;
+        resize: none;
+        transition: 0.3s;
+      }
+      textarea:focus {
+        border-color: #8e44ad;
+        outline: none;
+      }
+
+      .btn-predict {
+        background: #8e44ad;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+        width: 100%;
+      }
+      .btn-predict:hover {
+        background: #7d3c98;
+        transform: translateY(-2px);
+      }
+
+      .result-box {
+        margin-top: 25px;
+        padding: 20px;
+        background: #fcfaff;
+        border-left: 5px solid #8e44ad;
+        border-radius: 8px;
+        display: none;
+        animation: fadeIn 0.5s;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .result-item {
+        margin-bottom: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 5px;
+      }
+      .result-label {
+        font-weight: 600;
+        color: #7f8c8d;
+        width: 140px;
+        display: inline-block;
+      }
+
+      .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-top: 15px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        background: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #eee;
+        position: sticky;
+        top: 0;
+      }
+      td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <div class="logo">
+        <img
+          src="logo.png"
+          alt="Logo"
+          onerror="this.src = 'https://via.placeholder.com/60?text=BPJS'"
+        />
+        <h3>BPJS Kesehatan</h3>
+      </div>
+      <div class="menu">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="data.html">Data</a>
+        <a href="prediction.html" class="active">Prediction</a>
+        <a href="evaluation.html" class="active">Evaluation</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <h2>Simulasi Prediksi SVM</h2>
+        <p style="color: #7f8c8d; font-size: 0.9rem">
+          Masukkan komentar baru untuk melihat bagaimana model SVM
+          mengklasifikasikan sentimen secara real-time.
+        </p>
+
+        <div style="margin-top: 20px">
+          <label><b>Teks Komentar</b></label>
+          <textarea
+            id="inputText"
+            placeholder="Contoh: Aplikasi ini sangat membantu dalam pendaftaran JKN..."
+          ></textarea>
+          <button class="btn-predict" onclick="jalankanPrediksi()">
+            Predict
+          </button>
+        </div>
+
+        <div id="resultCard" class="result-box">
+          <h3 style="margin-bottom: 15px; color: #8e44ad">Hasil Prediksi</h3>
+          <div class="result-item">
+            <span class="result-label">Komentar:</span>
+            <span id="resComment"></span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Sentiment Score:</span>
+            <span id="resScore" style="font-weight: bold; font-size: 1.1rem"
+              >0</span
+            >
+          </div>
+          <div class="result-item">
+            <span class="result-label">Pre-processing:</span>
+            <span
+              id="resCleaned"
+              style="font-style: italic; color: #95a5a6"
+            ></span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Label Sentimen:</span>
+            <span
+              id="resLabel"
+              style="font-weight: bold; font-size: 1.1rem"
+            ></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Riwayat Prediksi</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px">No</th>
+                <th>Review Text</th>
+                <th style="width: 120px">Sentimen</th>
+                <th style="width: 80px">Rating</th>
+              </tr>
+            </thead>
+            <tbody id="tabelKomentar">
+              <tr>
+                <td colspan="4" style="text-align: center">
+                  Memuat data dari CSV...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function jalankanPrediksi() {
+        const text = document.getElementById("inputText").value.trim();
+        if (!text) {
+          alert("Silakan masukkan teks ulasan terlebih dahulu.");
+          return;
+        }
+
+        const cleaned = text.toLowerCase().replace(/[^\w\s]/gi, "");
+        const posWords = [
+          "bagus",
+          "baik",
+          "cepat",
+          "puas",
+          "mantap",
+          "mudah",
+          "bantu",
+          "oke",
+          "terima kasih",
+          "lancar",
+          "berguna",
+          "rekomendasi",
+          "bermanfaat",
+        ];
+        const negWords = [
+          "buruk",
+          "lambat",
+          "susah",
+          "jelek",
+          "kecewa",
+          "error",
+          "lama",
+          "sulit",
+          "parah",
+          "rugi",
+          "sampah",
+          "gak jelas",
+        ];
+
+        let score = 0;
+        const words = cleaned.split(/\s+/);
+        words.forEach((word) => {
+          if (posWords.includes(word)) score += 1;
+          if (negWords.includes(word)) score -= 1;
+        });
+
+        let label = "NEUTRAL";
+        let warna = "#f1c40f";
+
+        if (score > 0) {
+          label = "POSITIVE";
+          warna = "#2ecc71";
+        } else if (score < 0) {
+          label = "NEGATIVE";
+          warna = "#e74c3c";
+        }
+        document.getElementById("resComment").innerText = `"${text}"`;
+        document.getElementById("resCleaned").innerText = cleaned;
+        document.getElementById("resLabel").innerText = label;
+        document.getElementById("resLabel").style.color = warna;
+
+        document.getElementById("resScore").innerText = score;
+        document.getElementById("resScore").style.color =
+          score > 0 ? "#2ecc71" : score < 0 ? "#e74c3c" : "#95a5a6";
+
+        document.getElementById("resultCard").style.display = "block";
+        document
+          .getElementById("resultCard")
+          .scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      window.onload = function () {
+        Papa.parse("data_uji.csv", {
+          download: true,
+          header: true,
+          skipEmptyLines: true,
+          complete: function (results) {
+            let data = results.data;
+            let tableBody = document.getElementById("tabelKomentar");
+            tableBody.innerHTML = "";
+
+            if (data.length > 0) {
+              data.slice(0, 50).forEach((row, index) => {
+                let tr = document.createElement("tr");
+                let snt = (
+                  row["sentiment_label"] ||
+                  row["sentimen"] ||
+                  ""
+                ).toLowerCase();
+                let color =
+                  snt === "positive"
+                    ? "#2ecc71"
+                    : snt === "negative"
+                      ? "#e74c3c"
+                      : "#f1c40f";
+
+                tr.innerHTML = `
+                  <td>${index + 1}</td>
+                  <td>${row["Review Text"] || row["content"] || "-"}</td>
+                  <td style="color: ${color}; font-weight: bold;">${snt.toUpperCase() || "NEUTRAL"}</td>
+                  <td>${row["Rating"] || row["score"] || "0"} ⭐</td>
+                `;
+                tableBody.appendChild(tr);
+              });
+            } else {
+              tableBody.innerHTML =
+                "<tr><td colspan='4' style='text-align:center;'>Data CSV kosong.</td></tr>";
+            }
+          },
+          error: function () {
+            document.getElementById("tabelKomentar").innerHTML =
+              "<tr><td colspan='4' style='text-align:center; color:red;'>Gagal memuat file CSV. Periksa nama file atau jalankan lewat Live Server!</td></tr>";
+          },
+        });
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+<div class="menu">
+  <a href="dashboard.html">Dashboard</a>
+  <a href="data.html" class="active">Data</a>
+  <a href="prediction.html">Prediction</a>
+  <a href="evaluation.html">Evaluation</a>
+</div>
+
+<button class="btn-logout" onclick="logout()">Logout</button>
+
+<script>
+  function logout() {
+    alert("Berhasil Logout");
+
+    localStorage.removeItem("login");
+
+    window.location.href = "login.html";
+  }
+</script>

@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evaluasi Model Lengkap | BPJS Sentiment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        display: flex;
+        background: #f4f7f6;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 250px;
+        background: #1b263b;
+        color: white;
+        padding: 20px;
+        height: 100vh;
+        position: fixed;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .logo img {
+        width: 60px;
+        background: white;
+        border-radius: 50%;
+        padding: 5px;
+      }
+      .menu a {
+        display: block;
+        color: #bdc3c7;
+        padding: 12px;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 5px;
+      }
+      .menu a.active {
+        background: #415a77;
+        color: white;
+      }
+      .content {
+        margin-left: 250px;
+        padding: 40px;
+        width: calc(100% - 250px);
+      }
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+      }
+      .btn-calc {
+        background: #8e44ad;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+        margin-bottom: 20px;
+      }
+      .btn-calc:hover {
+        background: #7d3c98;
+        transform: translateY(-2px);
+      }
+      .acc-box {
+        background: #1b263b;
+        color: white;
+        text-align: center;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+      }
+      .acc-box h1 {
+        font-size: 3rem;
+        color: #63b3ed;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      th {
+        text-align: left;
+        padding: 12px;
+        background: #f8fafc;
+        border-bottom: 2px solid #eee;
+      }
+      td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+      }
+      .file-input-wrapper {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 2px dashed #8e44ad;
+        border-radius: 10px;
+        background: #fff;
+        text-align: center;
+      }
+      .label-rating {
+        color: #8e44ad;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo">
+        <img
+          src="logo.png"
+          alt="Logo"
+          onerror="this.src = 'https://via.placeholder.com/60?text=BPJS'"
+        />
+        <h3>BPJS Kesehatan</h3>
+      </div>
+      <div class="menu">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="data.html">Data</a>
+        <a href="prediction.html">Prediction</a>
+        <a href="evaluation.html" class="active">Evaluation</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="header" style="margin-bottom: 25px">
+        <h2>Evaluasi Model Perbandingan</h2>
+      </div>
+
+      <div class="file-input-wrapper">
+        <p style="margin-bottom: 10px; font-size: 14px; color: #555">
+          Pilih file <b>data_uji_prediksi.csv</b>:
+        </p>
+        <input type="file" id="csvFileInput" accept=".csv" />
+      </div>
+
+      <button class="btn-calc" onclick="hitungEvaluasiDariCSV()">
+        Mulai Hitung Evaluasi
+      </button>
+
+      <div class="acc-box">
+        <h1 id="accValue">0%</h1>
+        <p>OVERALL ACCURACY (LEXICON)</p>
+      </div>
+
+      <div class="card">
+        <h3>1. Classification Report (Lexicon Based)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Sentimen</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+              <th>Support</th>
+            </tr>
+          </thead>
+          <tbody id="reportContent">
+            <tr>
+              <td colspan="5" style="text-align: center">
+                Silakan upload data...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="file-input-wrapper">
+        <p>Pilih file <b>train_data.csv</b>:</p>
+        <input type="file" id="fileRating" accept=".csv" />
+        <div
+          class="center-button"
+          style="text-align: center; margin-top: 30px"
+        ></div>
+      </div>
+
+      <button class="btn-calc" onclick="hitungEvaluasiDariCSV()">
+        Mulai Hitung Evaluasi
+      </button>
+
+      <div class="acc-box">
+        <h1 id="overallAccuracyText">0%</h1>
+        <p>OVERALL ACCURACY (RATING BASED)</p>
+      </div>
+
+      <div class="card">
+        <h3>2. Classification Report (Rating Based)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Sentimen</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+              <th>Support</th>
+            </tr>
+          </thead>
+          <tbody id="reportRatingContent">
+            <tr>
+              <td colspan="5" style="text-align: center">
+                Silakan upload data...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Ringkasan Performa</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Metode</th>
+              <th>Total Benar</th>
+              <th>Akurasi</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonContent">
+            <tr>
+              <td colspan="4" style="text-align: center">Menunggu proses...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      function hitungEvaluasiDariCSV() {
+        const fileInput = document.getElementById("csvFileInput");
+        const file = fileInput.files[0];
+
+        if (!file) {
+          alert("Pilih file CSV-nya dulu!");
+          return;
+        }
+
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function (results) {
+            const data = results.data;
+
+            let lexMetrics = {
+              positive: { tp: 0, fp: 0, fn: 0 },
+              negative: { tp: 0, fp: 0, fn: 0 },
+              neutral: { tp: 0, fp: 0, fn: 0 },
+            };
+            let ratMetrics = {
+              positive: { tp: 0, fp: 0, fn: 0 },
+              negative: { tp: 0, fp: 0, fn: 0 },
+              neutral: { tp: 0, fp: 0, fn: 0 },
+            };
+
+            let correctLexicon = 0;
+            let correctRating = 0;
+            let totalValid = 0;
+
+            data.forEach((row) => {
+              const actual = (row["Actual Sentiment"] || "")
+                .toLowerCase()
+                .trim();
+              const predLexicon = (row["Predicted Sentiment"] || "")
+                .toLowerCase()
+                .trim();
+
+              const rawRating = parseInt(row["Original Rating"]);
+              let predRating = "";
+              if (rawRating >= 4) predRating = "positive";
+              else if (rawRating === 3) predRating = "neutral";
+              else if (rawRating <= 2 && rawRating > 0) predRating = "negative";
+
+              if (
+                actual &&
+                (actual === "positive" ||
+                  actual === "negative" ||
+                  actual === "neutral")
+              ) {
+                totalValid++;
+
+                // 1. Logika Lexicon
+                if (actual === predLexicon) {
+                  correctLexicon++;
+                  lexMetrics[actual].tp++;
+                } else {
+                  if (lexMetrics[predLexicon]) lexMetrics[predLexicon].fp++;
+                  lexMetrics[actual].fn++;
+                }
+
+                // 2. Logika Rating
+                if (actual === predRating) {
+                  correctRating++;
+                  ratMetrics[actual].tp++;
+                } else {
+                  if (ratMetrics[predRating]) ratMetrics[predRating].fp++;
+                  ratMetrics[actual].fn++;
+                }
+              }
+            });
+
+            if (totalValid === 0) {
+              alert(
+                "Kolom tidak cocok! Gunakan file yang ada kolom 'Actual Sentiment', 'Predicted Sentiment', dan 'Original Rating'.",
+              );
+              return;
+            }
+
+            function fillTable(metrics) {
+              let html = "";
+              ["positive", "negative", "neutral"].forEach((label) => {
+                const m = metrics[label];
+                const p = m.tp / (m.tp + m.fp) || 0;
+                const r = m.tp / (m.tp + m.fn) || 0;
+                const f1 = (2 * (p * r)) / (p + r) || 0;
+                html += `<tr>
+                  <td style="text-transform:capitalize"><b>${label}</b></td>
+                  <td>${p.toFixed(2)}</td><td>${r.toFixed(2)}</td>
+                  <td>${f1.toFixed(2)}</td><td>${m.tp + m.fn}</td>
+                </tr>`;
+              });
+              return html;
+            }
+
+            document.getElementById("accValue").innerText =
+              ((correctLexicon / totalValid) * 100).toFixed(2) + "%";
+            document.getElementById("reportContent").innerHTML =
+              fillTable(lexMetrics);
+            document.getElementById("reportRatingContent").innerHTML =
+              fillTable(ratMetrics);
+
+            const accLex = (correctLexicon / totalValid) * 100;
+            const accRat = (correctRating / totalValid) * 100;
+
+            document.getElementById("comparisonContent").innerHTML = `
+              <tr>
+                <td><b>Lexicon Based</b></td>
+                <td>${correctLexicon}</td>
+                <td>${accLex.toFixed(2)}%</td>
+                <td style="color:${accLex >= accRat ? "#2ecc71" : "#e74c3c"}"><b>${accLex >= accRat ? "Unggul" : "Kalah"}</b></td>
+              </tr>
+              <tr>
+                <td><b>Rating Based</b></td>
+                <td>${correctRating}</td>
+                <td>${accRat.toFixed(2)}%</td>
+                <td style="color:${accRat > accLex ? "#2ecc71" : "#e74c3c"}"><b>${accRat > accLex ? "Unggul" : "Kalah"}</b></td>
+              </tr>`;
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
